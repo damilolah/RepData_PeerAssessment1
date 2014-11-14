@@ -11,7 +11,7 @@ Loading data...
 ```r
 unzip("activity.zip")
 library(data.table)
-activity <- data.table(read.csv("./activity.csv", nrows = 17568))
+activity <- data.table(read.csv("./activity.csv", nrows = 17568, colClasses = c("integer", "Date", "integer")))
 activityComplCases <- activity[complete.cases(activity),]
 write.table(activityComplCases, "activityCompCases.txt", sep = "\t", )
 ```
@@ -23,8 +23,8 @@ Plot Histogram...
 
 
 ```r
-stepsPerDay <- aggregate(steps ~ date, data = activityComplCases, FUN = sum)
-barplot(stepsPerDay$steps, names.arg = stepsPerDay$date, xlab = "date", ylab = "steps", col = "green", main= "Total number of steps per day")
+stepsPerDay <- with(activityComplCases, tapply(steps, date, sum, na.rm = T))
+hist(stepsPerDay, breaks = 10, xlab = "Steps", col = "green", main= "Total number of steps per day")
 ```
 
 ![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2-1.png) 
@@ -35,7 +35,7 @@ Calculate and report the mean and median total number of steps taken per day
 
 
 ```r
-mean(stepsPerDay$steps)
+mean(stepsPerDay)
 ```
 
 ```
@@ -43,7 +43,7 @@ mean(stepsPerDay$steps)
 ```
 
 ```r
-median(stepsPerDay$steps)
+median(stepsPerDay)
 ```
 
 ```
@@ -103,7 +103,9 @@ sum(is.na(activity))
 
 Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
 
-Create a new dataset that is equal to the original dataset but with the missing data filled in.
+ Create a new dataset that is equal to the original dataset but with the missing data filled in.
+ 
+# The devise I used is this: I filled the NAs with the mean for that 5-minute interval.
 
 
 ```r
@@ -143,14 +145,14 @@ Make a histogram of the total number of steps taken each day and Calculate and r
 
 
 ```r
-stepsPerDate <- aggregate(steps ~ date, data = activity, FUN = sum)
-barplot(stepsPerDate$steps, names.arg = stepsPerDate$date, xlab = "date", ylab = "steps", col = "green", main= "Total number of steps per day")
+stepsPerDate <- with(activity, tapply(steps, date, sum, na.rm = T))
+hist(stepsPerDay, breaks = 10, xlab = "Steps", col = "green", main= "Total number of steps per day")
 ```
 
 ![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
 
 ```r
-mean(stepsPerDate$steps)
+mean(stepsPerDate)
 ```
 
 ```
@@ -158,7 +160,7 @@ mean(stepsPerDate$steps)
 ```
 
 ```r
-median(stepsPerDate$steps)
+median(stepsPerDate)
 ```
 
 ```

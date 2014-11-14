@@ -10,7 +10,7 @@ Loading data...
 ```{r echo = TRUE}
 unzip("activity.zip")
 library(data.table)
-activity <- data.table(read.csv("./activity.csv", nrows = 17568))
+activity <- data.table(read.csv("./activity.csv", nrows = 17568, colClasses = c("integer", "Date", "integer")))
 activityComplCases <- activity[complete.cases(activity),]
 write.table(activityComplCases, "activityCompCases.txt", sep = "\t", )
 ```
@@ -21,8 +21,9 @@ Make a histogram of the total number of steps taken each day
 Plot Histogram...
 
 ```{r echo = TRUE}
-stepsPerDay <- aggregate(steps ~ date, data = activityComplCases, FUN = sum)
-barplot(stepsPerDay$steps, names.arg = stepsPerDay$date, xlab = "date", ylab = "steps", col = "green", main= "Total number of steps per day")
+stepsPerDay <- with(activityComplCases, tapply(steps, date, sum, na.rm = T))
+hist(stepsPerDay, breaks = 10, xlab = "Steps", col = "green", main= "Total number of steps per day")
+
 ```
 
 
@@ -30,8 +31,8 @@ barplot(stepsPerDay$steps, names.arg = stepsPerDay$date, xlab = "date", ylab = "
 Calculate and report the mean and median total number of steps taken per day
 
 ```{r echo = TRUE}
-mean(stepsPerDay$steps)
-median(stepsPerDay$steps)
+mean(stepsPerDay)
+median(stepsPerDay)
 
 ```
 
@@ -64,7 +65,9 @@ sum(is.na(activity))
 
 Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
 
-Create a new dataset that is equal to the original dataset but with the missing data filled in.
+ Create a new dataset that is equal to the original dataset but with the missing data filled in.
+ 
+# The devise I used is this: I filled the NAs with the mean for that 5-minute interval.
 
 ```{r echo = TRUE}
 activity <- merge(activity, stepsPerInterval, by = "interval", suffixes = c("", 
@@ -79,10 +82,10 @@ head(activity)
 Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
 ```{r echo = TRUE}
-stepsPerDate <- aggregate(steps ~ date, data = activity, FUN = sum)
-barplot(stepsPerDate$steps, names.arg = stepsPerDate$date, xlab = "date", ylab = "steps", col = "green", main= "Total number of steps per day")
-mean(stepsPerDate$steps)
-median(stepsPerDate$steps)
+stepsPerDate <- with(activity, tapply(steps, date, sum, na.rm = T))
+hist(stepsPerDay, breaks = 10, xlab = "Steps", col = "green", main= "Total number of steps per day")
+mean(stepsPerDate)
+median(stepsPerDate)
 ```
 The impact of imputing missing data on the estimates of the total daily number of steps is not much.
 
